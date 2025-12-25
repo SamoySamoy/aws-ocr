@@ -1,0 +1,28 @@
+{
+  "StartAt": "LoadPDF",
+  "States": {
+    "LoadPDF": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:load_pdf",
+      "Next": "ExtractInvoice"
+    },
+    "ExtractInvoice": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:extract_invoice",
+      "Catch": [{
+        "ErrorEquals": ["UnprocessableDocument"],
+        "Next": "Fail"
+      }],
+      "Next": "SaveToDynamo"
+    },
+    "SaveToDynamo": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:save_dynamo",
+      "End": true
+    },
+    "Fail": {
+      "Type": "Fail",
+      "Error": "ExtractionFailed"
+    }
+  }
+}
